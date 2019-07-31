@@ -1,0 +1,81 @@
+I did not make make_parser in terms of make_matcher because the acceptor was
+different for make_parser. It accepted two arguments: one the fragment (the
+part which is not yet parsed) and another is the deduction rules (the rules
+used in order to parse a given fragment). These rules are returned when the
+fragment is empty i.e. there is nothing more to parse. I used a similar function
+as make_matcher with an additional argument for storing rules to use for my make_parser.
+
+make_matcher function is built on two simultaneously recursive functions match_non
+and match_rule. They call each other to process the entire fragment. match_non
+processes a single nonterminal and appends to it the result of the rest of the rule.
+To get the result of the rest of the rule it calls the function match_rule. Function
+match_rule takes care of an entire rule. If it sees a nonterminal, it calls match_non
+If None is returned by either, they go to the next rule. To do the back-tracing in
+match_rule, I used a curried acceptor. The argument passed to this acceptor is
+the left over rule, so that once any rule going on is finished, it can process
+the left over rule. The functions are complicated since I have added all the
+work in just 2 functions. The whole code would be easier to understand and simpler
+if I had broken them down into pieces (small functions). I tried to use that approach
+for the second function to avoid complication. My program's other weakness is that it
+can be slow with complicated fragments such as test_case_4 in sample cases.
+
+For make_parser, I used functions like parse_make_matcher, give_rule_list,
+parse_tree_acceptor, number_nonterminals, number_rules, remove_from_list,
+and make_tree. Make tree takes in a list of rules. It creates a parse_tree list
+out of that. To have Nodes and Leaf on the same level, it uses remove_from_list
+and number_nonterminals. Whenever it sees a non_terminal remove_from_list deletes
+the rules from the top of the rules list based on the number given by number_nonterminals.
+number_nonterminals adds to list all the non_terminals it sees in the rule and then
+subtracts by 1 Whenever it opens up a node to see the non_terminals inside. This is
+the function that required a lot of thinking. To keep it on the same level, I needed
+to delete the rules but to figure out how many to delete required some time.
+The other recursive functions are pretty self explanatory. They are there to
+support the two functions above I described. The recursive function number_nonterminals
+returns the number of non-terminals in a list given a rule. Another recursive
+function give_rule_list gives us a list of rules used to do the fragment parsing
+when the output of parse_make_matcher is fed into it. parse_make_matcher is
+similar to make_matcher except that it's acceptor returns Some (derivation_rules,
+fragment) and the function returns a list of rules in a format of a tuple.
+
+One of the weaknesses of this function is that it uses concatenation (@) which
+greatly increases the time complexity. The time complexity of @ is O(n^2),
+since it travels to the end of the list. I could not use any other alternative like
+(::) since I needed to maintain a specific order of the rules
+
+Unfortunately, the way I wrote my make_parser was my second attempt. In my
+previous attempt, I modified make_matcher function. To make it work, I changed
+the return value to parse_tree for match_non and parse_tree list for match_rule.
+I ran into a lot of type errors and at last, I was able to get the output below
+for the following fragment: ["$"; "1"; "++"; "-"; "2"].
+
+Some
+ (Node (Expr,
+   [Node (Term,
+     [Node (Lvalue,
+       [Leaf "$";
+        Node (Expr,
+         [Node (Term,
+           [Node (Num,
+             [Leaf "1";])])])])])]))
+
+
+I realized that it happened because I did not do the back-tracing. So, I fixed
+that by using additional arguments in my functions. Now, it gave me the output
+below. It has all the Nodes and Leaves but not on the right level. Then, I
+tried to fix the levels in the parse_tree but I hit a dead end and went with the
+approach explained on the top.
+
+Some
+ (Node (Expr,
+   [Node (Term,
+     [Node (Lvalue,
+       [Leaf "$";
+        Node (Expr,
+         [Node (Term,
+           [Node (Num,
+             [Leaf "1";
+              Node (Incrop,
+               [Leaf "++";
+                Node (Binop,
+                 [Leaf "-";
+                  Node (Expr, [Node (Term, [Node (Num, [Leaf "2"])])])])])])])])])])]))

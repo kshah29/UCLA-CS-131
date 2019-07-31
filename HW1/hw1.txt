@@ -1,0 +1,39 @@
+Subset: I recursively check if all the elements in the first list are in the second list.
+        The base case is when the first list is empty, I return true. To check if an element
+        belongs to the other list, I use a helper function belong which recursively checks if
+        the element exists in the other list.
+
+Equal Sets: I check if both the lists provided are subset of each other.
+
+Set Union: I recursively go over the second list and check if every element exists in the
+           first list. If it doesn't exist, I add that element to the first list. The base case
+           is when the second list is empty. I return the first list in that case.
+
+Set Intersection: I call another helper function which has an accumulator. I recursively go over
+                  every element in the second list and add that element to the accumulator if it
+                  exists in the first list. The base case is when the second list is empty, we
+                  return the accumulator. One of the weakness is that I use @ instead of :: which
+                  decreases efficiency. I used @ to maintain the order of the second list.
+
+Set Difference: I call another helper function which has an accumulator. I recursively go over
+                every element in the first list and add that to the accumulator if it is not
+                there in the second list. The base case is when the first list is empty, I return
+                the accumulator. I used accumulator as I thought it would be easier to implement
+                using another helper function.
+
+Computed Fixed Point:  I check if (f x) is equal to x. If it is I return x. If not I call the
+                        same function with x as (f x). I solved the problem recursively.
+
+Filter Reachable: The basic idea is that I every-time I take a non_terminal I will add all its rules
+                  to a separate accumulator and I will add all the non terminals on the right hand side
+                  of every rule of that non-terminal to the non terminal list (another accumulator).
+                  To do both them in parallel I have 2 different functions which returns list of
+                  non-terminals and rules respectively. I have another function which returns the
+                  list of non-terminals given the right hand side of a rule used by the function which
+                  returns the list of non-terminals. Main helper function uses these functions to get
+                  the list of rules. The base case is when the non terminal list is empty, it returns
+                  the accumulator for the rules. It keeps another list for all the processed non-terminals
+                  so that it does not process them again and no cycle is formed. The filter reachable
+                  function calls this main helper function and performs set intersection on it with
+                  the given rules to maintain the order of the rules given. This method is
+                  inefficient and could be made better by having fewer calls.
